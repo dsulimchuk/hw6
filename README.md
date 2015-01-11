@@ -5,10 +5,10 @@ Modern Web Application Development for Java Programmers Homework 6
 
 + Multiple people can bid on a Product. Just create a couple of Product instances with hardcoded data. Use TimerTask and random number generator to emulate bidding process.
 
-+A collection of Bid objects represents current bids
++ A collection of Bid objects represents current bids
 
-+When a “user” places a new bid, add it to the collection of bids, and “send an email” (just print on the console) to all bidders who opted for receiving overbid emails.
++ When a “user” places a new bid, add it to the collection of bids, and “send an email” (just print on the console) to all bidders who opted for receiving overbid emails.
 
-+If a bid is greater or equal to the Product reserved price, send the bidder a winning If a bid is less that a min Product price, send a bidder a sorry email.
++ If a bid is greater or equal to the Product reserved price, send the bidder a winning If a bid is less that a min Product price, send a bidder a sorry email.
 
-+Implement the test suite for auction prototype using Spock Framework
++ Implement the test suite for auction prototype using Spock Framework
