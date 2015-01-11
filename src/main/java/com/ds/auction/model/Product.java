@@ -94,4 +94,14 @@ public class Product {
     public void setReservedPrice(BigDecimal reservedPrice) {
         this.reservedPrice = reservedPrice;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "'" + title + '\'' +
+                ", Qty=" + quantity +
+                ", " + minimalPrice +
+                " - " + reservedPrice +
+                '}';
+    }
 }

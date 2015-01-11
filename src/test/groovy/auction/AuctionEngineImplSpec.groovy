@@ -14,7 +14,7 @@ import java.time.LocalDateTime
  */
 
 @Title("AuctionEngine Specification")
-class AuctionEngineSpec extends spock.lang.Specification {
+class AuctionEngineImplSpec extends spock.lang.Specification {
 
     @Shared
     def auction;
@@ -36,7 +36,7 @@ class AuctionEngineSpec extends spock.lang.Specification {
         setup:
             def b1 = new Bid(p[0], BigDecimal.valueOf(1), 1, u[0]);
             def notServ = Spy(NotificationService, constructorArgs: []);
-            auction = new AuctionEngine(notServ);
+            auction = new AuctionEngineImpl(notServ);
         when:
             auction.placeBid(b1)
         then:
@@ -46,7 +46,7 @@ class AuctionEngineSpec extends spock.lang.Specification {
     def "should send NotificationMsg.OK_YOUR_BID_IS_WINNING to user"() {
         setup:
             def notServ = Spy(NotificationService, constructorArgs: []);
-            auction = new AuctionEngine(notServ);
+            auction = new AuctionEngineImpl(notServ);
             def b1 = new Bid(p[0], BigDecimal.valueOf(1020), 1, u[0]);
         when:
             auction.placeBid(b1)
@@ -59,7 +59,7 @@ class AuctionEngineSpec extends spock.lang.Specification {
         setup:
 
             def notServ = Spy(NotificationService, constructorArgs: []);
-            auction = new AuctionEngine(notServ);
+            auction = new AuctionEngineImpl(notServ);
             def b1 = new Bid(p[0], BigDecimal.valueOf(200), 1, u[0]);
             def b2 = new Bid(p[0], BigDecimal.valueOf(201), 1, u[1]);
             def b3 = new Bid(p[0], BigDecimal.valueOf(202), 1, u[0]);
@@ -82,7 +82,7 @@ class AuctionEngineSpec extends spock.lang.Specification {
         setup:
 
             def notServ = Spy(NotificationService, constructorArgs: []);
-            auction = new AuctionEngine(notServ);
+            auction = new AuctionEngineImpl(notServ);
             def b1 = new Bid(p[0], BigDecimal.valueOf(900), 1, u[0]);
             def b2 = new Bid(p[0], BigDecimal.valueOf(1000), 1, u[1]);
             def b3 = new Bid(p[0], BigDecimal.valueOf(1010), 1, u[0]);
@@ -93,6 +93,23 @@ class AuctionEngineSpec extends spock.lang.Specification {
 
         then:
             1 * notServ.sendNotification(u[0], NotificationMsg.ERR_AUCT_IS_CLOSE)
+
+    }
+    def "should return true if auction is closed"() {
+        setup:
+            auction = new AuctionEngineImpl(new NotificationService());
+            def b1 = new Bid(p[0], BigDecimal.valueOf(900), 1, u[0]);
+            def b2 = new Bid(p[0], BigDecimal.valueOf(1000), 1, u[1]);
+        when:
+            auction.placeBid(b1);
+        then:
+            auction.auctionIsClosed(p[0]) == false
+
+        when:
+            auction.placeBid(b2);
+        then:
+            auction.auctionIsClosed(p[0]) == true
+
 
     }
 }

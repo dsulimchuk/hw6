@@ -2,99 +2,12 @@ package com.ds.auction;
 
 import com.ds.auction.model.Bid;
 import com.ds.auction.model.Product;
-import com.ds.auction.service.NotificationMsg;
-import com.ds.auction.service.NotificationService;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
+/**
+ * Created by ds on 11/01/15.
+ */
+public interface AuctionEngine {
+    void placeBid(Bid bid);
 
-public class AuctionEngine {
-    private final NotificationService notificationService;
-
-    private Map<Product, List<Bid>> currentBids = new HashMap<>();
-
-    public AuctionEngine(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
-
-    //ENGINE
-    synchronized public void placeBid(Bid bid) {
-
-        List<Bid> bids = getBidsForProduct(bid.getProduct());
-        System.out.println("-------" + bids.size());
-        if (bids.contains(bid))
-            return;
-
-        //check bid date
-        bid.setBidTime(LocalDateTime.now());
-        if (bid.getBidTime().compareTo(bid.getProduct().getAuctionEndTime()) > 0) {
-            notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_AUCT_IS_CLOSE);
-            return;
-        }
-
-        //check auction product available quantity
-        if (bid.getProduct().getQuantity() <= getWinnedQty(bids)) {
-            notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_AUCT_IS_CLOSE);
-            return;
-        }
-
-
-//      If a bid is less that a min Product price, send a bidder a sorry email.
-        if (bid.getAmount().compareTo(bid.getProduct().getMinimalPrice()) < 0) {
-            notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_BID_LESS_MIN_PRICE);
-            return;
-        }
-
-        bids.add(bid);
-
-        Optional<BigDecimal> currentMax = bids.stream()
-                .filter(b -> b != bid && b.getAmount().compareTo(b.getProduct().getReservedPrice()) < 0)
-                .map(b -> b.getAmount())
-                .reduce((b1, b2) -> b1.compareTo(b2) > 0 ? b1 : b2);
-
-        boolean bidGrThanReservedPrice = bid.getAmount().compareTo(bid.getProduct().getReservedPrice()) >= 0;
-
-        if (!currentMax.isPresent()
-                || bid.getAmount().compareTo(currentMax.get()) > 0
-                || bidGrThanReservedPrice) {
-
-            //If a bid is greater or equal to the Product reserved price, send the bidder a winning
-            if (bidGrThanReservedPrice && (bid.getProduct().getQuantity() - getWinnedQty(bids)) >= bid.getDesiredQuantity()) {
-                bid.setWinning(true);
-                notificationService.sendNotification(bid.getUser(), NotificationMsg.OK_YOUR_BID_IS_WINNING);
-            }
-
-
-            //notify bidders who opted for receiving overbid emails.
-            bids.stream()
-                    .filter((b) -> b != bid && b.getUser() != bid.getUser())
-                    .map(b -> b.getUser())
-                    .distinct()
-                    .forEach((u) -> {
-                        if (u.isGetOverbidNotifications()) {
-                            notificationService.sendNotification(u, NotificationMsg.NOTIF_YOUR_BID_IS_OVERBIDDED);
-                        }
-                    });
-        }
-    }
-
-    private int getWinnedQty(List<Bid> bids) {
-        Optional<Integer> qty = bids.stream()
-                .filter(b -> b.isWinning())
-                .map(b -> b.getDesiredQuantity())
-                .reduce(Integer::sum);
-        return qty.isPresent() ? qty.get().intValue() : 0;
-    }
-
-    private List<Bid> getBidsForProduct(Product product) {
-        List<Bid> bids = currentBids.get(product);
-
-        if (bids == null) {
-           bids = new LinkedList<>();
-           currentBids.put(product, bids);
-        }
-
-        return bids;
-    }
+    boolean auctionIsClosed(Product product);
 }

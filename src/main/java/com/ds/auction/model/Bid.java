@@ -74,4 +74,14 @@ public class Bid {
     public void setWinning(boolean isWinning) {
         this.isWinning = isWinning;
     }
+
+    @Override
+    public String toString() {
+        return "Bid{" +
+                "product=" + product +
+                ", amount=" + amount +
+                ", desiredQuantity=" + desiredQuantity +
+                ", user=" + user +
+                '}';
+    }
 }
