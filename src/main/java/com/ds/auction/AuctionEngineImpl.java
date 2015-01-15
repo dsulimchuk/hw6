@@ -22,7 +22,7 @@ public class AuctionEngineImpl implements AuctionEngine {
     synchronized public void placeBid(Bid bid) {
 
         List<Bid> bids = getBidsForProduct(bid.getProduct());
-        System.out.println("-------" + bid);
+        System.out.println("call placeBid " + bid);
         if (bids.contains(bid))
             return;
 
@@ -40,7 +40,7 @@ public class AuctionEngineImpl implements AuctionEngine {
         }
 
 
-//      If a bid is less that a min Product price, send a bidder a sorry email.
+        //If a bid is less that a min Product price, send a bidder a sorry email.
         if (bid.getAmount().compareTo(bid.getProduct().getMinimalPrice()) < 0) {
             notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_BID_LESS_MIN_PRICE);
             return;
@@ -89,7 +89,7 @@ public class AuctionEngineImpl implements AuctionEngine {
                 .filter(b -> b.isWinning())
                 .map(b -> b.getDesiredQuantity())
                 .reduce(Integer::sum);
-        return qty.isPresent() ? qty.get().intValue() : 0;
+        return qty.isPresent() ? qty.get() : 0;
     }
 
     private List<Bid> getBidsForProduct(Product product) {
