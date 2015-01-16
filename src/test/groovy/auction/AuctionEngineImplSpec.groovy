@@ -1,9 +1,8 @@
 package com.ds.auction
-
 import com.ds.auction.model.Bid
 import com.ds.auction.model.Product
 import com.ds.auction.model.User
-import com.ds.auction.service.NotificationMsg
+import com.ds.auction.service.Notification
 import com.ds.auction.service.NotificationService
 import spock.lang.Shared
 import spock.lang.Title
@@ -40,7 +39,7 @@ class AuctionEngineImplSpec extends spock.lang.Specification {
         when:
             auction.placeBid(b1)
         then:
-            1 * notServ.sendNotification(u[0], NotificationMsg.ERR_BID_LESS_MIN_PRICE)
+            1 * notServ.sendNotification(u[0], Notification.ERR_BID_LESS_MIN_PRICE)
     }
 
     def "should send NotificationMsg.OK_YOUR_BID_IS_WINNING to user"() {
@@ -52,7 +51,7 @@ class AuctionEngineImplSpec extends spock.lang.Specification {
             auction.placeBid(b1)
             auction.placeBid(b1)
         then:
-            1 * notServ.sendNotification(u[0], NotificationMsg.OK_YOUR_BID_IS_WINNING)
+            1 * notServ.sendNotification(u[0], Notification.OK_YOUR_BID_IS_WINNING)
     }
 
     def "should send  NotificationMsg.NOTIF_YOUR_BID_IS_OVERBIDDED to user 3 times"() {
@@ -74,8 +73,8 @@ class AuctionEngineImplSpec extends spock.lang.Specification {
             auction.placeBid(b5)
             auction.placeBid(b6)
         then:
-            3 * notServ.sendNotification(u[0], NotificationMsg.NOTIF_YOUR_BID_IS_OVERBIDDED)
-            2 * notServ.sendNotification(u[1], NotificationMsg.NOTIF_YOUR_BID_IS_OVERBIDDED)
+            3 * notServ.sendNotification(u[0], Notification.NOTIF_YOUR_BID_IS_OVERBIDDED)
+            2 * notServ.sendNotification(u[1], Notification.NOTIF_YOUR_BID_IS_OVERBIDDED)
     }
 
     def "should send  NotificationMsg.ERR_AUCT_IS_CLOSE to user 1 times"() {
@@ -92,7 +91,7 @@ class AuctionEngineImplSpec extends spock.lang.Specification {
             auction.placeBid(b3)
 
         then:
-            1 * notServ.sendNotification(u[0], NotificationMsg.ERR_AUCT_IS_CLOSE)
+            1 * notServ.sendNotification(u[0], Notification.ERR_AUCT_IS_CLOSE)
 
     }
     def "should return true if auction is closed"() {

@@ -2,7 +2,7 @@ package com.ds.auction;
 
 import com.ds.auction.model.Bid;
 import com.ds.auction.model.Product;
-import com.ds.auction.service.NotificationMsg;
+import com.ds.auction.service.Notification;
 import com.ds.auction.service.NotificationService;
 
 import java.math.BigDecimal;
@@ -29,20 +29,20 @@ public class AuctionEngineImpl implements AuctionEngine {
         //check bid date
         bid.setBidTime(LocalDateTime.now());
         if (bid.getBidTime().compareTo(bid.getProduct().getAuctionEndTime()) > 0) {
-            notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_AUCT_IS_CLOSE);
+            notificationService.sendNotification(bid.getUser(), Notification.ERR_AUCT_IS_CLOSE);
             return;
         }
 
         //check auction product available quantity
         if (auctionIsClosed(bid.getProduct())) {
-            notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_AUCT_IS_CLOSE);
+            notificationService.sendNotification(bid.getUser(), Notification.ERR_AUCT_IS_CLOSE);
             return;
         }
 
 
         //If a bid is less that a min Product price, send a bidder a sorry email.
         if (bid.getAmount().compareTo(bid.getProduct().getMinimalPrice()) < 0) {
-            notificationService.sendNotification(bid.getUser(), NotificationMsg.ERR_BID_LESS_MIN_PRICE);
+            notificationService.sendNotification(bid.getUser(), Notification.ERR_BID_LESS_MIN_PRICE);
             return;
         }
 
@@ -62,7 +62,7 @@ public class AuctionEngineImpl implements AuctionEngine {
             //If a bid is greater or equal to the Product reserved price, send the bidder a winning
             if (bidGrThanReservedPrice && (bid.getProduct().getQuantity() - getWinnedQty(bids)) >= bid.getDesiredQuantity()) {
                 bid.setWinning(true);
-                notificationService.sendNotification(bid.getUser(), NotificationMsg.OK_YOUR_BID_IS_WINNING);
+                notificationService.sendNotification(bid.getUser(), Notification.OK_YOUR_BID_IS_WINNING);
             }
 
 
@@ -73,7 +73,7 @@ public class AuctionEngineImpl implements AuctionEngine {
                     .distinct()
                     .forEach((u) -> {
                         if (u.isGetOverbidNotifications()) {
-                            notificationService.sendNotification(u, NotificationMsg.NOTIF_YOUR_BID_IS_OVERBIDDED);
+                            notificationService.sendNotification(u, Notification.NOTIF_YOUR_BID_IS_OVERBIDDED);
                         }
                     });
         }
