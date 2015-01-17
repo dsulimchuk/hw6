@@ -20,11 +20,11 @@ public class AuctionEngineImpl implements AuctionEngine {
 
     //ENGINE
     synchronized public void placeBid(Bid bid) {
-
-        List<Bid> bids = getBidsForProduct(bid.getProduct());
         System.out.println("call placeBid " + bid);
-        if (bids.contains(bid))
+        List<Bid> bids = getBidsForProduct(bid.getProduct());
+        if (bids.contains(bid)) {
             return;
+        }
 
         //check bid date
         bid.setBidTime(LocalDateTime.now());
@@ -80,7 +80,7 @@ public class AuctionEngineImpl implements AuctionEngine {
     }
 
     @Override
-    public boolean auctionIsClosed(Product product) {
+    synchronized public boolean auctionIsClosed(Product product) {
         return (product.getQuantity() - getWinnedQty(getBidsForProduct(product))) <= 0;
     }
 
@@ -90,6 +90,27 @@ public class AuctionEngineImpl implements AuctionEngine {
                 .map(b -> b.getDesiredQuantity())
                 .reduce(Integer::sum);
         return qty.isPresent() ? qty.get() : 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("AuctionEngine winning bids = {\n");
+        currentBids.keySet()
+                .stream()
+                .forEach((product) -> {
+                    stringBuffer.append(product);
+                    stringBuffer.append("[");
+                    getBidsForProduct(product)
+                            .stream()
+                            .filter((bid) -> bid.isWinning() == true)
+                            .forEach((bid) -> stringBuffer.append("\n\t").append(bid).append(','));
+                    stringBuffer.append("]\n");
+
+                });
+        stringBuffer.append("}");
+
+        return stringBuffer.toString();
     }
 
     private List<Bid> getBidsForProduct(Product product) {

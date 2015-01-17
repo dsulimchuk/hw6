@@ -83,8 +83,8 @@ class AuctionEngineImplSpec extends spock.lang.Specification {
             def notServ = Spy(NotificationService, constructorArgs: []);
             auction = new AuctionEngineImpl(notServ);
             def b1 = new Bid(p[0], BigDecimal.valueOf(900), 1, u[0]);
-            def b2 = new Bid(p[0], BigDecimal.valueOf(1000), 1, u[1]);
-            def b3 = new Bid(p[0], BigDecimal.valueOf(1010), 1, u[0]);
+            def b2 = new Bid(p[0], BigDecimal.valueOf(1001), 1, u[1]);
+            def b3 = new Bid(p[0], BigDecimal.valueOf(500), 1, u[0]);
         when:
             auction.placeBid(b1)
             auction.placeBid(b2)
@@ -108,7 +108,8 @@ class AuctionEngineImplSpec extends spock.lang.Specification {
             auction.placeBid(b2);
         then:
             auction.auctionIsClosed(p[0]) == true
-
-
     }
+
+
+
 }

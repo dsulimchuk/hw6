@@ -8,10 +8,14 @@ import com.ds.auction.service.NotificationService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class AuctionDemo {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         User[] u = {
                 new User("user1", "user2@ff.com", true),
                 new User("user2", "user2@ff.com", true),
@@ -25,35 +29,78 @@ public class AuctionDemo {
 
 
         AuctionEngine auction = new AuctionEngineImpl(new NotificationService());
-        Random rand = new Random();
 
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                int prodNumber = rand.nextInt(p.size());
-                int userNumber = rand.nextInt(u.length);
-                Product product = p.get(prodNumber);
-                Bid bid = new Bid(product,
-                                    BigDecimal.valueOf(
-                                        rand.nextInt(
-                                                product.getReservedPrice().intValue()
-                                                - product.getMinimalPrice().intValue() + 1
-                                                    ) + product.getMinimalPrice().intValue()),
-                                    1,
-                                    u[userNumber]);
-                auction.placeBid(bid);
-                if (auction.auctionIsClosed(product)) {
-                    p.remove(product);
-                }
-                if (p.size() == 0) {
-                    timer.cancel();
-                    timer.purge();
-                }
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
+                new ScheduledThreadPoolExecutor(u.length);
+
+        for (int i = 0; i < u.length; i++) {
+            System.out.println(i);
+            scheduledThreadPoolExecutor.scheduleWithFixedDelay(
+                    new UserEmulator(u[i], p, auction),
+                    i,
+                    50,
+                    TimeUnit.MILLISECONDS);
+        }
+
+
+
+        while(!scheduledThreadPoolExecutor.isTerminated()){
+            //wait for all tasks to finish
+            if (scheduledThreadPoolExecutor.getQueue().size() == 0) {
+                scheduledThreadPoolExecutor.shutdown();
             }
-        };
+            Thread.sleep(1000);
+        }
+        System.out.println("Finished all threads");
+        System.out.println(auction);
+
+    }
 
 
-        timer.schedule(timerTask, 1000, 20);
+
+}
+
+class UserEmulator implements Runnable{
+    private User user;
+    private List<Product> products;
+    private AuctionEngine auction;
+    private Random rand;
+
+
+    public UserEmulator(User user, List<Product> products, AuctionEngine auction) {
+        this.user = user;
+        this.products = products;
+        this.auction = auction;
+        rand = new Random();
+    }
+
+    @Override
+    public void run() {
+        try {
+            if (products.size() == 0) {
+                throw new RuntimeException("Stop!");
+            }
+            int prodNumber = rand.nextInt(products.size());
+            Product product = products.get(prodNumber);
+            int bound = product.getReservedPrice().intValue()
+                    - product.getMinimalPrice().intValue() + 1;
+
+            int nextInt = rand.nextInt(bound);
+            Bid bid = new Bid(product,
+                    BigDecimal.valueOf(
+                            nextInt + product.getMinimalPrice().intValue() + 500),
+                    1,
+                    user);
+            auction.placeBid(bid);
+            if (auction.auctionIsClosed(product)) {
+                products.remove(product);
+            }
+        }catch (Exception e) {
+            //System.out.println(e);
+            throw e;
+        }
+
+
+
     }
 }

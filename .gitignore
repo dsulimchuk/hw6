@@ -1,5 +1,4 @@
 build
-gradlew*
 .git
 .gradle
 gradle/*
