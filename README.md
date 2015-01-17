@@ -12,3 +12,5 @@ Modern Web Application Development for Java Programmers Homework 6
 + If a bid is greater or equal to the Product reserved price, send the bidder a winning If a bid is less that a min Product price, send a bidder a sorry email.
 
 + Implement the test suite for auction prototype using Spock Framework
+
+###### to run demo use "./gradlew run" or "gradle.bat run" on windows
